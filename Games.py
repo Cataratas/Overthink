@@ -30,7 +30,7 @@ def tictactoe():
 
 		if start:
 			board = [[0 for i in range(3)] for j in range(3)]
-			player, start, first = True, False, True
+			player, start = True, False
 
 		# Player Victory
 		if board[0][0] == board[0][1] == board[0][2] == "x" or board[1][0] == board[1][1] == board[1][2] == "x" or board[2][0] == board[2][1] == board[2][2] == "x" or board[0][0] == board[1][0] == board[2][0] == "x" or board[0][1] == board[1][1] == board[2][1] == "x" or board[0][2] == board[1][2] == board[2][2] == "x" or board[0][0] == board[1][1] == board[2][2] == "x" or board[0][2] == board[1][1] == board[2][0] == "x":
@@ -56,44 +56,37 @@ def tictactoe():
 
 						for j in range(2):
 							if board[i][j] == t and board[i][j+1] == t and board[i][x] == 0 and not player:  # Check for X-X-0 (row)
-								board[i][x], player, first = "o", True, False
+								board[i][x], player = "o", True
 							else: x = 0
 
 							if board[j][i] == t and board[j+1][i] == t and board[y][i] == 0 and not player:  # Check for X-X-0 (column)
-								board[y][i], player, first = "o", True, False
+								board[y][i], player = "o", True
 							else: y = 0
 
 							if board[i][j] == t and board[i][2] == t and board[i][j+1] == 0 and not player:  # Check for X-0-X (row)
-								board[i][j+1], player, first = "o", True, False
+								board[i][j+1], player = "o", True
 
 							if board[j][i] == t and board [2][i] == t and board[j+1][i] == 0 and not player:  # Check for X-0-X (column)
-								board[j+1][i], player, first = "o", True, False
+								board[j+1][i], player = "o", True
 
 							if board[dr1][dr1] == t and board[dr1+1][dr1+1] == t and board[dr2][dr2] == 0 and not player:  # Check X-X-0 (diagonal - right to left)
-								board[dr2][dr2], player, first = "o", True, False
+								board[dr2][dr2], player = "o", True
 							else: dr1, dr2 = 1, 0
 
 							if board[dl1][dl2] == t and board[1][1] == t and board[dl2][dl1] == 0 and not player:  # Check X-X-0 (diagonal - left to right)
-								board[dl2][dl1], player, first = "o", True, False
+								board[dl2][dl1], player = "o", True
 							else: dl1, dl2 = 2, 0
 
 							if board[0][0] == t and board[2][2] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - right to left)
-								board[1][1], player, first = "o", True, False
+								board[1][1], player = "o", True
 
 							if board[0][2] == t and board[2][0] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - left to right)
-								board[1][1], player, first = "o", True, False
+								board[1][1], player = "o", True
 
 			if not player and easy:
-				move = random.randint(0, 9)
-				if move == 0 and board[0][0] == 0: board[0][0], player, first = "o", True, False
-				elif move == 1 and board[0][1] == 0: board[0][1], player, first = "o", True, False
-				elif move == 2 and board[0][2] == 0: board[0][2], player, first = "o", True, False
-				elif move == 3 and board[1][0] == 0: board[1][0], player, first = "o", True, False
-				elif move == 4 and board[1][1] == 0: board[1][1], player, first = "o", True, False
-				elif move == 5 and board[1][2] == 0: board[1][2], player, first = "o", True, False
-				elif move == 6 and board[2][0] == 0: board[2][0], player, first = "o", True, False
-				elif move == 7 and board[2][1] == 0: board[2][1], player, first = "o", True, False
-				elif move == 8 and board[2][2] == 0: board[2][2], player, first = "o", True, False
+				i = random.randint(0, 2)
+				j = random.randint(0, 2)
+				if board[i][j] == 0: board[i][j], player = "o", True
 
 		screen.fill(white)
 
