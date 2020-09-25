@@ -10,8 +10,7 @@ def tictactoe():
 	buttons = [[Button(" ", "Tile", (121, 121)) for i in range(3)] for j in range(3)]
 	board = [[0 for i in range(3)] for j in range(3)]
 
-	userscore, compscore, winscore = 0, 0, 3
-	start, easy, normal = True, True, True
+	userscore, compscore, winscore, start, player = 0, 0, 3, True, True
 
 	while True:
 		mouse = pygame.mouse.get_pos()
@@ -32,66 +31,59 @@ def tictactoe():
 			board = [[0 for i in range(3)] for j in range(3)]
 			player, start = True, False
 
-		# Player Victory
-		if board[0][0] == board[0][1] == board[0][2] == "x" or board[1][0] == board[1][1] == board[1][2] == "x" or board[2][0] == board[2][1] == board[2][2] == "x" or board[0][0] == board[1][0] == board[2][0] == "x" or board[0][1] == board[1][1] == board[2][1] == "x" or board[0][2] == board[1][2] == board[2][2] == "x" or board[0][0] == board[1][1] == board[2][2] == "x" or board[0][2] == board[1][1] == board[2][0] == "x":
+		# Victory / Draw
+		if board[0][0] == board[0][1] == board[0][2] == "x" or board[1][0] == board[1][1] == board[1][2] == "x" or \
+				board[2][0] == board[2][1] == board[2][2] == "x" or board[0][0] == board[1][0] == board[2][0] == "x" or \
+				board[0][1] == board[1][1] == board[2][1] == "x" or board[0][2] == board[1][2] == board[2][2] == "x" or \
+				board[0][0] == board[1][1] == board[2][2] == "x" or board[0][2] == board[1][1] == board[2][0] == "x":
 			userscore += 1; start = True
-
-		# Computer Victory
-		elif board[0][0] == board[0][1] == board[0][2] == "o" or board[1][0] == board[1][1] == board[1][2] == "o" or board[2][0] == board[2][1] == board[2][2] == "o" or board[0][0] == board[1][0] == board[2][0] == "o" or board[0][1] == board[1][1] == board[2][1] == "o" or board[0][2] == board[1][2] == board[2][2] == "o" or board[0][0] == board[1][1] == board[2][2] == "o" or board[0][2] == board[1][1] == board[2][0] == "o":
+		elif board[0][0] == board[0][1] == board[0][2] == "o" or board[1][0] == board[1][1] == board[1][2] == "o" or \
+				board[2][0] == board[2][1] == board[2][2] == "o" or board[0][0] == board[1][0] == board[2][0] == "o" or \
+				board[0][1] == board[1][1] == board[2][1] == "o" or board[0][2] == board[1][2] == board[2][2] == "o" or \
+				board[0][0] == board[1][1] == board[2][2] == "o" or board[0][2] == board[1][1] == board[2][0] == "o":
 			compscore += 1; start = True
-
-		# Draw
-		elif board[0][0] != 0 and board[0][1] != 0 and board[0][2] != 0 and board[1][0] != 0 and board[1][1] != 0 and board[1][2] != 0 and board[2][0] != 0 and board[2][1] != 0 and board[2][2] != 0:
+		elif board[0][0] != 0 and board[0][1] != 0 and board[0][2] != 0 and board[1][0] != 0 and board[1][1] != 0 and \
+				board[1][2] != 0 and board[2][0] != 0 and board[2][1] != 0 and board[2][2] != 0:
 			start = True
 
 		if userscore == winscore: return True
 		elif compscore == winscore: return False
 
 		while not player and not start:
-			if normal:
-				for t in ["o", "x"]:
-
-					for i in range(3):
-						x, y, dr1, dr2, dl1, dl2 = 2, 2, 0, 2, 0, 2
-
-						for j in range(2):
-							if board[i][j] == t and board[i][j+1] == t and board[i][x] == 0 and not player:  # Check for X-X-0 (row)
-								board[i][x], player = "o", True
-							else: x = 0
-
-							if board[j][i] == t and board[j+1][i] == t and board[y][i] == 0 and not player:  # Check for X-X-0 (column)
-								board[y][i], player = "o", True
-							else: y = 0
-
-							if board[i][j] == t and board[i][2] == t and board[i][j+1] == 0 and not player:  # Check for X-0-X (row)
-								board[i][j+1], player = "o", True
-
-							if board[j][i] == t and board [2][i] == t and board[j+1][i] == 0 and not player:  # Check for X-0-X (column)
-								board[j+1][i], player = "o", True
-
-							if board[dr1][dr1] == t and board[dr1+1][dr1+1] == t and board[dr2][dr2] == 0 and not player:  # Check X-X-0 (diagonal - right to left)
-								board[dr2][dr2], player = "o", True
-							else: dr1, dr2 = 1, 0
-
-							if board[dl1][dl2] == t and board[1][1] == t and board[dl2][dl1] == 0 and not player:  # Check X-X-0 (diagonal - left to right)
-								board[dl2][dl1], player = "o", True
-							else: dl1, dl2 = 2, 0
-
-							if board[0][0] == t and board[2][2] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - right to left)
-								board[1][1], player = "o", True
-
-							if board[0][2] == t and board[2][0] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - left to right)
-								board[1][1], player = "o", True
-
-			if not player and easy:
+			for t in ["o", "x"]:
+				for i in range(3):
+					x, y, dr1, dr2, dl1, dl2 = 2, 2, 0, 2, 0, 2
+					for j in range(2):
+						if board[i][j] == t and board[i][j+1] == t and board[i][x] == 0 and not player:  # Check for X-X-0 (row)
+							board[i][x], player = "o", True
+						else: x = 0
+						if board[j][i] == t and board[j+1][i] == t and board[y][i] == 0 and not player:  # Check for X-X-0 (column)
+							board[y][i], player = "o", True
+						else: y = 0
+						if board[i][j] == t and board[i][2] == t and board[i][j+1] == 0 and not player:  # Check for X-0-X (row)
+							board[i][j+1], player = "o", True
+						if board[j][i] == t and board [2][i] == t and board[j+1][i] == 0 and not player:  # Check for X-0-X (column)
+							board[j+1][i], player = "o", True
+						if board[dr1][dr1] == t and board[dr1+1][dr1+1] == t and board[dr2][dr2] == 0 and not player:  # Check X-X-0 (diagonal - right to left)
+							board[dr2][dr2], player = "o", True
+						else: dr1, dr2 = 1, 0
+						if board[dl1][dl2] == t and board[1][1] == t and board[dl2][dl1] == 0 and not player:  # Check X-X-0 (diagonal - left to right)
+							board[dl2][dl1], player = "o", True
+						else: dl1, dl2 = 2, 0
+						if board[0][0] == t and board[2][2] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - right to left)
+							board[1][1], player = "o", True
+						if board[0][2] == t and board[2][0] == t and board[1][1] == 0 and not player:  # Check X-0-X (diagonal - left to right)
+							board[1][1], player = "o", True
+			if not player:
 				i = random.randint(0, 2)
 				j = random.randint(0, 2)
 				if board[i][j] == 0: board[i][j], player = "o", True
 
 		screen.fill(white)
 
-		for i in range(winscore): draw("./Layout/BlackCircle.png", sw//2 - 162 - 38*i, sh*.06)
-		for i in range(winscore): draw("./Layout/BlackCircle.png", sw//2 + 135 + 38*i, sh*.06)
+		for i in range(winscore):
+			draw("./Layout/BlackCircle.png", sw//2 - 162 - 38*i, sh*.06)
+			draw("./Layout/BlackCircle.png", sw//2 + 135 + 38*i, sh*.06)
 		for i in range(userscore): draw("./Layout/BlueCircle.png", sw//2 - 162 - 38*i, sh*.06)
 		for i in range(compscore): draw("./Layout/RedCircle.png", sw//2 + 135 + 38*i, sh*.06)
 
