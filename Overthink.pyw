@@ -476,7 +476,8 @@ def menuquest(reset=True):
                     Quiz1, life1, coin1, temp0, temp1, temp2, temp3, temp4 = pickle.load(f)
                 with open("./Quizzes/{}.pkl".format(quiz_file), "wb") as f:
                     pickle.dump([Quiz1, life1, coin1, x, total, life, score, coin], f)
-                mainmenu()
+                if event.type == pygame.QUIT: sys.exit()
+                else: mainmenu()
             elif Games.click(event): minigames()
 
         if correct:
