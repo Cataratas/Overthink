@@ -1,4 +1,6 @@
-import pygame, time, sys
+import pygame
+import time
+import sys
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
@@ -6,6 +8,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, Frame, KeepInFrame
 from PyPDF2 import PdfFileReader
 from Modules import ptext
+import reportlab.platypus.doctemplate
 
 screen = pygame.display.set_mode((1280, 720))
 pygame.font.init()
@@ -13,7 +16,7 @@ pygame.font.init()
 
 class Languages:
 	def __init__(self):
-		self.list = ["" for i in range(45)]
+		self.list = ["" for self in range(45)]
 	
 	def en(self):
 		self.list[0] = "Start"
@@ -187,7 +190,7 @@ class Question:
 
 
 class Button:
-	def __init__(self, text, color, r_size = (195, 42)):
+	def __init__(self, text, color, r_size=(195, 42)):
 		self.rect = pygame.Rect((0, 0), r_size)
 		self.text = text
 		self.color = color
@@ -200,7 +203,7 @@ class Button:
 	def set_text(self, text):
 		self.text = text
 	
-	def show(self, mouse, x , y, bool = True, pressed = False, mirror = False, lh = 0.675, fontname="./Fonts/berlin-sans-fb-demi-bold.ttf", f_size = 26):
+	def show(self, mouse, x, y, bool=True, pressed=False, mirror=False, lh=0.675, fontname="./Fonts/berlin-sans-fb-demi-bold.ttf", f_size=26):
 		self.set_pos(x, y)
 		if x+self.rect.width > mouse[0] > x and y+self.rect.height > mouse[1] > y and bool and not pressed:
 			draw('./Buttons/{} 2.png'.format(self.color), x, y, mirror)
@@ -209,9 +212,9 @@ class Button:
 		elif not bool:
 			draw('./Buttons/{} 0.png'.format(self.color), x, y, mirror)
 		else: draw('./Buttons/{}.png'.format(self.color), x, y, mirror)
-		ptext.draw(self.text, center = (x+self.rect.width/2, y+self.rect.height/2), color = (255, 255, 255), width = self.rect.width, align = "center", fontname=fontname, fontsize = f_size, lineheight = lh)
+		ptext.draw(self.text, center=(x+self.rect.width/2, y+self.rect.height/2), color=(255, 255, 255), width=self.rect.width, align="center", fontname=fontname, fontsize=f_size, lineheight=lh)
 		
-	def click(self, event, bool = True):
+	def click(self, event, bool=True):
 		if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and bool: return self.rect.collidepoint(event.pos)
 
 
@@ -242,10 +245,13 @@ def window(event):
 		pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
 
-# TODO: FIX SKIP QUESTION BUG ... SOMEHOW
 def pdf(File, Quiz, Active, feedback, column, Language):
 	global step
 	step, x, width, height, step2 = -1, 21.6, 550, 735, False
+
+	style1 = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14, spaceBefore=0, alignment=4)
+	style2 = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14, leftIndent=25, bulletIndent=10, alignment=4)
+	style3 = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14)
 
 	def header():
 		canvas.setFont("Times-Roman", 12)
@@ -255,28 +261,25 @@ def pdf(File, Quiz, Active, feedback, column, Language):
 		canvas.drawString(470, 800, Language.list[42])
 		canvas.drawString(140, 782, Language.list[43])
 		canvas.drawString(470, 782, Language.list[44])
-		canvas.line(125, 820, 560, 820)
-		canvas.line(125, 820, 125, 770)
-		canvas.line(125, 770, 560, 770)
-		canvas.line(560, 820, 560, 770)
+		canvas.line(125, 820, 560, 820); canvas.line(125, 820, 125, 770)
+		canvas.line(125, 770, 560, 770); canvas.line(560, 820, 560, 770)
 
-	def quest(text1, text2, w, h):
+	def quest(text1, text2, w, h, styleA, styleB):
+		style = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=0, leading=8, spaceBefore=0, alignment=4)
 		global step
 		letters = ["a", "b", "c", "d"]
 		if step == -1:
-			style = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14, spaceBefore=8, alignment=4)
-			story = [Paragraph(text1, style=style)]
-			frame.addFromList([KeepInFrame(w, h, story, mode="error")], canvas)
+			frame.addFromList([KeepInFrame(w, h, [Paragraph("-", style=style)], mode="error")], canvas)
+			frame.addFromList([KeepInFrame(w, h, [Paragraph(text1, style=styleA)], mode="error")], canvas)
 			step += 1
-		style = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14, leftIndent=25, bulletIndent=10, alignment=4)
 		while step <= 3:
-			story = [Paragraph(text2[step], style=style, bulletText=str(letters[step] + "."))]
+			story = [Paragraph(text2[step], style=styleB, bulletText=str(letters[step] + "."))]
 			frame.addFromList([KeepInFrame(w, h, story, mode="error")], canvas)
 			step += 1
 		step = -1
 
-	def answer(text1, text2):
-		story = [Paragraph(str("{}. ".format(text2) + text1), style=style)]
+	def answer(text1, text2, Style):
+		story = [Paragraph(str("{}. ".format(text2) + text1), style=Style)]
 		frames[step].addFromList([KeepInFrame(79, 800, story, mode="error")], canvas)
 
 	canvas = Canvas("Quiz.pdf", pagesize=A4)
@@ -288,9 +291,9 @@ def pdf(File, Quiz, Active, feedback, column, Language):
 	while i < len(Quiz):
 		if Active[i]:
 			try:
-				quest(str("{}. ".format(total) + Quiz[i].question), Quiz[i].answer, width, height)
+				quest(str("{}. ".format(total) + Quiz[i].question), Quiz[i].answer, width, height, style1, style2)
 				total += 1; i += 1
-			except:
+			except reportlab.platypus.doctemplate.LayoutError:
 				if not column:
 					if step2: canvas.showPage(); x = 21.6; height = 800
 					else: x = 296.6
@@ -300,7 +303,6 @@ def pdf(File, Quiz, Active, feedback, column, Language):
 		else: i += 1
 
 	if feedback:
-		style = ParagraphStyle(name="Normal", fontName="Times-Roman", fontSize=11, leading=14)
 		canvas.showPage(); frames = []
 		for k in range(7): frames.append(Frame(.3 * inch + k * 79, 20, 79, 800))
 
@@ -308,9 +310,9 @@ def pdf(File, Quiz, Active, feedback, column, Language):
 		while i < len(Quiz):
 			if Active[i]:
 				try:
-					answer(Quiz[i].answer[-1], total)
+					answer(Quiz[i].answer[-1], total, style3)
 					total += 1; i += 1
-				except:
+				except reportlab.platypus.doctemplate.LayoutError:
 					if step == 6:
 						step, frames = 0, []; canvas.showPage()
 						for k in range(7): frames.append(Frame(.3 * inch + k * 79, 20, 79, 800))

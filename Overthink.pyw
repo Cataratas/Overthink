@@ -1,4 +1,10 @@
-import pickle, os, json, sys, win32api, fitz, pygame
+import pickle
+import os
+import json
+import sys
+import win32api
+import fitz
+# import pygame
 from Modules import ptext, pygame_textinput
 from Functions import draw, Button, centerprint, Languages, Question, Time, window, printt, pdf, pdfpagecount
 from Games import tictactoe, minesweeper, maze, sudoku, memory, hangman
@@ -541,8 +547,7 @@ def minigames():
 
 
 def endmenu(victory):
-    global Quiz, life, coin, totalnum, x, total, score
-
+    global Quiz, life, coin, x, total, score
     Again = Button(Language.list[17], "bBlue", (407, 42)); Start = Button(Language.list[18], "bBlue", (407, 42))
 
     with open("./Quizzes/{}.pkl".format(quiz_file), "rb") as f:

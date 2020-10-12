@@ -20,3 +20,10 @@ font24 = pygame.font.Font('./Fonts/myriad-pro-8.otf', 24)
 FONT21 = pygame.font.Font('./Fonts/seguisym.ttf', 21)
 font21 = pygame.font.Font('./Fonts/berlin-sans-fb-demi-bold.ttf', 21)
 font18 = pygame.font.Font('./Fonts/berlin-sans-fb-demi-bold.ttf', 18)
+
+pt = ["presidente", "escola", "esquecer", "correr", "peixe", "fuja", "assustador", "procure", "juventude", "mundo", "marte", "estados", "derrota", "contando", "estrelas", "universo", "eletricidade", "hotel", "ouro", "dinheiro", "mentir",
+      "sonhar", "amanhecer", "desconhecido", "ajudar", "felicidade", "amizade", "desconfiar", "concorrer", "auxiliar", "temperatura", "animal", "advogado", "liberdade", "denunciar", "conhecer", "desculpa", "poder", "achar", "computador"]
+en = ["president", "school", "forget", "run", "fish", "escape", "scary", "search", "youth", "world", "mars", "states", "defeat", "counting", "stars", "universe", "electricity", "hotel", "gold", "money", "lie", "dream", "dawn", "unknown",
+      "help", "happiness", "friendship", "mistrust", "compete", "temperature", "animal", "lawyer", "freedom", "denounce", "know", "apology", "power", "find", "computer", "bicycle", "shame"]
+es = ["presidente", "escuela", "olvidar", "correr", "pez", "escapar", "miedo", "buscar", "juventud", "mundo", "marte", "estados", "derrota", "contando", "estrellas", "universo", "electricidad", "hotel", "oro", "dinero", "mentira",
+      "amanecer", "desconocido", "ayuda", "felicidad", "amistad", "desconfianza", "competencia", "temperatura", "animal", "abogado", "libertad", "denuncia", "saber", "disculpa", "poder", "encontrar", "computadora", "bicicleta"]

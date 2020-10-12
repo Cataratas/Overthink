@@ -1,5 +1,8 @@
+import random
+import pygame.freetype
+import time
+# import pygame
 from Functions import Button, draw, centerprint, Time
-import random, pygame.freetype, time, pygame
 from Variables import *
 
 clock = pygame.time.Clock()
@@ -62,7 +65,7 @@ def tictactoe():
 						else: y = 0
 						if board[i][j] == t and board[i][2] == t and board[i][j+1] == 0 and not player:  # Check for X-0-X (row)
 							board[i][j+1], player = "o", True
-						if board[j][i] == t and board [2][i] == t and board[j+1][i] == 0 and not player:  # Check for X-0-X (column)
+						if board[j][i] == t and board[2][i] == t and board[j+1][i] == 0 and not player:  # Check for X-0-X (column)
 							board[j+1][i], player = "o", True
 						if board[dr1][dr1] == t and board[dr1+1][dr1+1] == t and board[dr2][dr2] == 0 and not player:  # Check X-X-0 (diagonal - right to left)
 							board[dr2][dr2], player = "o", True
@@ -110,10 +113,11 @@ def minesweeper():
 	defeat, seconds, flags, timepiece = False, None, bombs, Time()
 	colors = [blue, green, red2, darkblue, darkred, s_darkgray, s_darkgray, s_darkgray]
 	grid = [[Tile() for y in range(columns)] for x in range(rows)]
+	win, startTime = None, None
 
 	def bombcounter(x, y):  # Checks bombs near tile
 		bombnear = 0
-		for (cx, cy) in [(0,1), (0,-1), (1,0), (-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]:
+		for (cx, cy) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
 			try:
 				if y+cy < 0 or x+cx < 0:  # Avoid off grid checking
 					raise IndexError
@@ -132,7 +136,7 @@ def minesweeper():
 			if tile.flag: flags += 1
 			if tile.near > 0: return
 			tile.visible = True
-			for (cx, cy) in [(0,1), (0,-1), (1,0), (-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]:
+			for (cx, cy) in [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
 				search(x+cx, y+cy)
 
 	for b in range(bombs):  # Place the bombs
@@ -170,7 +174,7 @@ def minesweeper():
 			seconds = round(int(time.time() - startTime))
 			if seconds > 3: return False
 
-		win = True # Victory
+		win = True  # Victory
 		for r in grid:
 			for t in r:
 				if t.bomb and not t.flag:
@@ -242,13 +246,13 @@ def maze():
 
 		def update(self):
 			p_k = pygame.key.get_pressed()
-			if (p_k[pygame.K_RIGHT] or p_k[pygame.K_d]) and (Grid[self.x+1][self.y] is not 1):
+			if (p_k[pygame.K_RIGHT] or p_k[pygame.K_d]) and (Grid[self.x+1][self.y] != 1):
 				self.x += 1
-			elif (p_k[pygame.K_LEFT] or p_k[pygame.K_a]) and (Grid[self.x-1][self.y] is not 1):
+			elif (p_k[pygame.K_LEFT] or p_k[pygame.K_a]) and (Grid[self.x-1][self.y] != 1):
 				self.x -= 1; self.right = False
-			elif (p_k[pygame.K_UP] or p_k[pygame.K_w]) and (Grid[self.x][self.y-1] is not 1):
+			elif (p_k[pygame.K_UP] or p_k[pygame.K_w]) and (Grid[self.x][self.y-1] != 1):
 				self.y -= 1
-			elif (p_k[pygame.K_DOWN] or p_k[pygame.K_s]) and (Grid[self.x][self.y+1] is not 1):
+			elif (p_k[pygame.K_DOWN] or p_k[pygame.K_s]) and (Grid[self.x][self.y+1] != 1):
 				self.y += 1
 			if p_k[pygame.K_RIGHT] or p_k[pygame.K_d]: self.right = True
 			if p_k[pygame.K_LEFT] or p_k[pygame.K_a]: self.right = False
@@ -316,15 +320,15 @@ def maze():
 
 	# Randomly Position Stuff
 	Player.x, Player.y = random.randint(0, COLUMNS-1), random.randint(0, ROWS-1)
-	while Grid[Player.x][Player.y] is not 0:
+	while Grid[Player.x][Player.y] != 0:
 		Player.x, Player.y = random.randint(0, COLUMNS-1), random.randint(0, ROWS-1)
 	for i in range(3):
 		Keys.append(Key())
 		Keys[i].x, Keys[i].y = random.randint(0, COLUMNS-1), random.randint(0, ROWS-1)
-		while Grid[Keys[i].x][Keys[i].y] is not 0:
+		while Grid[Keys[i].x][Keys[i].y] != 0:
 			Keys[i].x, Keys[i].y = random.randint(0, COLUMNS - 1), random.randint(0, ROWS - 1)
 	Exit.x, Exit.y = random.randint(0, COLUMNS - 1), random.randint(0, ROWS - 1)
-	while Grid[Exit.x][Exit.y] is not 0:
+	while Grid[Exit.x][Exit.y] != 0:
 		Exit.x, Exit.y = random.randint(0, COLUMNS - 1), random.randint(0, ROWS - 1)
 
 	while True:
@@ -376,8 +380,9 @@ def sudoku():
 
 	def generatesudoku(grid):
 		global counter
+		row, col = 0, 0
 		#  Find next empty cell
-		for i in range(0,81):
+		for i in range(0, 81):
 			row = i // 9
 			col = i % 9
 			if grid[row][col] == 0:
@@ -386,9 +391,8 @@ def sudoku():
 					#  Check that this value has not already be used on this row
 					if not(value in grid[row]):
 						#  Check that this value has not already be used on this column
-						if not value in (grid[0][col], grid[1][col], grid[2][col], grid[3][col], grid[4][col], grid[5][col], grid[6][col], grid[7][col], grid[8][col]):
+						if value not in (grid[0][col], grid[1][col], grid[2][col], grid[3][col], grid[4][col], grid[5][col], grid[6][col], grid[7][col], grid[8][col]):
 							#  Identify which of the 9 squares we are working on
-							square = []
 							if row < 3:
 								if col < 3: square = [grid[i][0:3] for i in range(0, 3)]
 								elif col < 6: square = [grid[i][3:6] for i in range(0, 3)]
@@ -402,7 +406,7 @@ def sudoku():
 								elif col < 6: square = [grid[i][3:6] for i in range(6, 9)]
 								else: square = [grid[i][6:9] for i in range(6, 9)]
 							#  Check that this value has not already be used on this 3x3 square
-							if not value in (square[0] + square[1] + square[2]):
+							if value not in (square[0] + square[1] + square[2]):
 								grid[row][col] = value
 								if checkgrid(grid): return True
 								else:
@@ -444,12 +448,13 @@ def sudoku():
 
 	def solvegrid(grid):
 		global counter
+		row, col = 0, 0
 		#  Find next empty cell
 		for i in range(0, 81):
 			row = i // 9
 			col = i % 9
 			if grid[row][col] == 0:
-				for value in range (1, 10):
+				for value in range(1, 10):
 					#  Check that this value has not already be used on this row
 					if not(value in grid[row]):
 						#  Check that this value has not already be used on this column
@@ -497,7 +502,7 @@ def sudoku():
 			pygame.draw.line(screen, black, ((sw//2 - 180)+120*i, (sh//2 - 220)), ((sw//2 - 180)+120*i, sh//2 + 140), 3)
 
 	class ButtonBox:
-		def __init__(self, number, x = 0, y = 0):
+		def __init__(self, number, x=0, y=0):
 			self.number = number
 			self.rect = pygame.Rect((x, y), (47, 47))
 
@@ -627,10 +632,10 @@ def memory():
 			self.visible = False
 			self.paired = False
 
-		def show(self, x, y, mouse, tile, w = 121):
+		def show(self, x, y, mouse, tile, w=121):
 			s = pygame.Surface((w, w), pygame.SRCALPHA)
 			s.fill((230, 230, 230))
-			if mouse == tile and second == None: s.fill((214, 214, 214))
+			if mouse == tile and second is None: s.fill((214, 214, 214))
 			if self.visible or self.paired:
 				s.fill(self.color)
 				freetypeprint(self.symbol, x, y, w, w, self.color)
@@ -672,7 +677,7 @@ def memory():
 				pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
 			if event.type == pygame.MOUSEBUTTONUP:
-				if mx >= 0 and my >= 0 and mx < rows and my < columns and grid[mx][my].paired == False and grid[mx][my].visible == False and second == None:
+				if mx >= 0 and my >= 0 and mx < rows and my < columns and not grid[mx][my].paired and not grid[mx][my].visible and second is None:
 					grid[mx][my].visible = True
 					if flips == 0: first = grid[mx][my]
 					elif flips == 1: second = grid[mx][my]
@@ -706,19 +711,14 @@ def memory():
 
 def hangman(lang):
 	alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-	pt = ["presidente", "escola", "esquecer", "correr", "peixe", "fuja", "assustador", "procure", "juventude", "mundo", "marte", "estados", "derrota", "contando", "estrelas", "universo", "eletricidade", "hotel", "ouro", "dinheiro", "mentir", "sonhar",
-		  "amanhecer", "desconhecido", "ajudar", "felicidade", "amizade", "desconfiar", "concorrer", "auxiliar", "temperatura", "animal", "advogado", "liberdade", "denunciar", "conhecer", "desculpa", "poder", "achar", "computador", "bicicleta"]
-	en = ["president", "school", "forget", "run", "fish", "escape", "scary", "search", "youth", "world", "mars", "states", "defeat", "counting", "stars", "universe", "electricity", "hotel", "gold", "money", "lie", "dream", "dawn", "unknown", "help",
-		  "happiness", "friendship", "mistrust", "compete", "temperature", "animal", "lawyer", "freedom", "denounce", "know", "apology", "power", "find", "computer", "bicycle", "shame"]
-	es = ["presidente", "escuela", "olvidar", "correr", "pez", "escapar", "miedo", "buscar", "juventud", "mundo", "marte", "estados", "derrota", "contando", "estrellas", "universo", "electricidad", "hotel", "oro", "dinero", "mentira", "amanecer",
-		  "desconocido", "ayuda" , "felicidad", "amistad", "desconfianza", "competencia", "temperatura", "animal", "abogado", "libertad", "denuncia", "saber", "disculpa", "poder", "encontrar", "computadora", "bicicleta"]
 
+	list = []
 	if lang == "pt": list = pt
 	if lang == "en": list = en
 	if lang == "es": list = es
 
 	word = list[random.randint(0, len(list)-1)]
-	letters, life = [], 7
+	letters, life, win = [], 7, None
 
 	while True:
 		sw, sh = screen.get_size()
@@ -734,41 +734,41 @@ def hangman(lang):
 				if event.h < 720: event.h = 720
 				pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-			for i in alphabet:  # Bug: Multiple key pressings not registering lifes correctly
+			for i in alphabet:
 				if event.type == pygame.TEXTINPUT and event.text.lower() == i and i not in letters:
 					letters.append(event.text.lower())
 					if event.text not in word: life -= 1
 
 		screen.fill(white)
 
-		draw("./Layout/Post.png", (sw // 2) - 300, sh * .275)
-		if life <= 6: draw("./Layout/Head.png", (sw // 2) - 199, sh * .275 + 37)
-		if life <= 5: draw("./Layout/Body.png", (sw // 2) - 175, sh * .275 + 87)
-		if life <= 4: draw("./Layout/Leg.png", (sw // 2) - 202, sh * .275 + 153)
-		if life <= 3: draw("./Layout/Leg.png", (sw // 2) - 176, sh * .275 + 153, True)
-		if life <= 2: draw("./Layout/Arm.png", (sw // 2) - 194, sh * .275 + 98)
-		if life <= 1: draw("./Layout/Arm.png", (sw // 2) - 175, sh * .275 + 98, True)
+		draw("./Layout/Post.png", (sw//2) - 300, sh*.275)
+		if life <= 6: draw("./Layout/Head.png", (sw//2) - 199, sh*.275 + 37)
+		if life <= 5: draw("./Layout/Body.png", (sw//2) - 175, sh*.275 + 87)
+		if life <= 4: draw("./Layout/Leg.png", (sw//2) - 202, sh*.275 + 153)
+		if life <= 3: draw("./Layout/Leg.png", (sw//2) - 176, sh*.275 + 153, True)
+		if life <= 2: draw("./Layout/Arm.png", (sw//2) - 194, sh*.275 + 98)
+		if life <= 1: draw("./Layout/Arm.png", (sw//2) - 175, sh*.275 + 98, True)
 		if life == 0:
-			draw("./Layout/Face.png", (sw // 2) - 187, sh * .275 + 52)
+			draw("./Layout/Face.png", (sw//2) - 187, sh*.275 + 52)
 			pygame.display.update(), pygame.time.delay(3000)
 			return False
 
 		a = 1
 		for i in range(len(word)):
 			if i > 6: a += 1
-		x = (sw // 2) + 120 - (30 * a)
+		x = (sw//2) + 120 - (30*a)
 		for i in word:
-			if i in letters: centerprint(i.upper(), x, sh * .275 + 196, 15, 15, black, fontW)
-			draw("./Layout/Blanks.png", x - 6, sh * .275 + 214)
+			if i in letters: centerprint(i.upper(), x, sh*.275 + 196, 15, 15, black, fontW)
+			draw("./Layout/Blanks.png", x-6, sh*.275 + 214)
 			x += 30
 
-		x = (sw // 2) - 390
+		x = (sw//2) - 390
 		for i in range(len(alphabet)):
 			if alphabet[i] in letters and alphabet[i] in word:
-				centerprint(alphabet[i].upper(), x, sh * .275 + 452, 15, 15, (140, 198, 63), fontABC)
+				centerprint(alphabet[i].upper(), x, sh*.275 + 452, 15, 15, (140, 198, 63), fontABC)
 			elif alphabet[i] in letters:
-				centerprint(alphabet[i].upper(), x, sh * .275 + 452, 15, 15, (193, 39, 45), fontABC)
-			else: centerprint(alphabet[i].upper(), x, sh * .275 + 452, 15, 15, (230, 230, 230), fontABC)
+				centerprint(alphabet[i].upper(), x, sh*.275 + 452, 15, 15, (193, 39, 45), fontABC)
+			else: centerprint(alphabet[i].upper(), x, sh*.275 + 452, 15, 15, (230, 230, 230), fontABC)
 			x += 30
 
 		pygame.display.update(), clock.tick(25)
