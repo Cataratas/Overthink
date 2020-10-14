@@ -429,7 +429,7 @@ def printmenu(File, Quiz):
         Return.show(mouse, 30, sh-80), Print.show(mouse, sw-225, sh-80)
         Column1.show(mouse, sw//2-580, sh//2-240, pressed=column), Column2.show(mouse, sw//2-330, sh//2-240, pressed=not column)
         Answer1.show(mouse, sw//2-580, sh//2-185, pressed=feedback), Answer2.show(mouse, sw//2-330, sh//2-185, pressed=not feedback)
-        All1.show(mouse, sw//2-580, sh//2-130, pressed=all)
+        All1.show(mouse, sw//2-580, sh//2-130, pressed=allQuestions)
         Page1.show(mouse, sw//2-580, sh//2+160, page > 0), Page2.show(mouse, sw//2-160, sh//2+160, page + 1 != pages and page + 1 < pages != 0, mirror=True)
         Page3.show(mouse, sw//2+30, sh//2+160, paperpage > 0), Page4.show(mouse, sw//2+460, sh//2+160, paperpage + 1 != pagecount and paperpage + 2 < pagecount != 0, mirror=True)
 
