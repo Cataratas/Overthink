@@ -3,10 +3,9 @@ import os
 import json
 import sys
 import win32api
-import fitz
 # import pygame
 from Modules import ptext, pygame_textinput
-from Functions import draw, Button, centerprint, Languages, Question, Time, window, printt, pdf, pdfpagecount
+from Functions import draw, Button, centerprint, Languages, Question, Time, window, printt, pdf, pdfPageCount, createImageFromPDF
 from Games import tictactoe, minesweeper, maze, sudoku, memory, hangman
 from Variables import *
 
@@ -350,32 +349,26 @@ def printmenu(File, Quiz):
     Page1 = Button(" ", "Page", (107, 42)); Page2 = Button(" ", "Page", (107, 42))
     Page3 = Button(" ", "Page", (107, 42)); Page4 = Button(" ", "Page", (107, 42))
 
-    column, feedback, all = True, False, True
+    column, feedback, allQuestions = True, False, True
     page, Buttons, change, paperpage, pagecount = 0, [], True, 0, 0
     Active = [True for i in range(len(Quiz))]
-    try:
-        os.remove("./Layout/Preview 0.png"), os.remove("./Layout/Preview 1.png")
+
+    try: os.remove("./Layout/Preview 0.png"), os.remove("./Layout/Preview 1.png")
     except FileNotFoundError: pass
+    createImageFromPDF("Quiz.pdf", paperpage)
 
     while True:
         mouse, pages = pygame.mouse.get_pos(), len(Quiz) / 27
         sw, sh = screen.get_size()
         if change:
             pdf(File, Quiz, Active, feedback, column, Language)
-            pagecount = pdfpagecount("Quiz.pdf")
-            doc = fitz.open("Quiz.pdf")
-            for i in range(2):
-                try:
-                    paper = doc.loadPage(paperpage+i)
-                except ValueError: break
-                pix = paper.getPixmap()
-                pix.writePNG("./Layout/Preview {}.png".format(i))
-
+            pagecount = pdfPageCount("Quiz.pdf")
+            createImageFromPDF("Quiz.pdf", paperpage)
             change = False
 
         for i in range(len(Active)):
-            if not Active[i]: all = False; break
-            if Active[i]: all = True
+            if not Active[i]: allQuestions = False; break
+            if Active[i]: allQuestions = True
 
         for event in pygame.event.get():
             window(event)
@@ -384,13 +377,15 @@ def printmenu(File, Quiz):
             elif Print.click(event): win32api.ShellExecute(0, "open", "Quiz.pdf", None,  ".",  0)
             elif Column1.click(event) and not column or Column2.click(event) and column: column = not column; change = True
             elif Answer1.click(event) and not feedback or Answer2.click(event) and feedback: feedback = not feedback; change = True
-            elif All1.click(event) and not all:
-                all, change = not all, True
-                if all: Active = [True for i in range(len(Quiz))]
+
+            elif All1.click(event) and not allQuestions:
+                allQuestions, change = not allQuestions, True
+                if allQuestions: Active = [True for i in range(len(Quiz))]
+
             elif Page1.click(event, page > 0): page -= 1
             elif Page2.click(event, page + 1 != pages and page + 1 < pages != 0): page += 1
-            elif Page3.click(event, paperpage > 0): paperpage -= 2; change = True
-            elif Page4.click(event, paperpage + 1 != pagecount and paperpage + 2 < pagecount != 0): paperpage += 2; change = True
+            elif Page3.click(event, paperpage > 0): paperpage -= 2; createImageFromPDF("Quiz.pdf", paperpage)
+            elif Page4.click(event, paperpage + 1 != pagecount and paperpage + 2 < pagecount != 0): paperpage += 2; createImageFromPDF("Quiz.pdf", paperpage)
 
             for i in range(len(Buttons)):
                 if Buttons[i].click(event): Active[i+page*27] = not Active[i+page*27]; change = True

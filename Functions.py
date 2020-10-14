@@ -1,6 +1,7 @@
 import pygame
 import time
 import sys
+import fitz
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
@@ -322,6 +323,14 @@ def pdf(File, Quiz, Active, feedback, column, Language):
 	canvas.save()
 
 
-def pdfpagecount(path):
+def pdfPageCount(path):
 	with open(path, 'rb') as fl:
 		return PdfFileReader(fl).getNumPages()
+
+
+def createImageFromPDF(File, paperpage):
+	doc = fitz.open(File)
+	for i in range(2):
+		try: paper = doc.loadPage(paperpage + i)
+		except ValueError: break
+		paper.getPixmap().writePNG("./Layout/Preview {}.png".format(i))
