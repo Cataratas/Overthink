@@ -1,3 +1,9 @@
+"""
+Copyright 2017, Silas Gyger, silasgyger@gmail.com, All rights reserved.
+
+Borrowed from https://github.com/Nearoo/pygame-text-input under the MIT license.
+"""
+
 import os.path
 import pyperclip
 
@@ -20,16 +26,17 @@ class TextInput:
 		self.limit = limit
 		self.mult_line = lines
 		self.click = click
-		self.message = message
+		self.prompt = message
 		self.rect = rect
-		self.active = "always"
+		self.focus = "always"
 		self.contain = contain
-			
+		self.cursor_toggle = True
+
 		repeat_keys_initial_ms = 400
 		repeat_keys_interval_ms = 35
 		pygame.key.set_repeat(repeat_keys_initial_ms, repeat_keys_interval_ms)
 		
-		if click: self.active = False
+		if click: self.focus = False
 		
 		if not os.path.isfile(font_family):
 			font_family = pygame.font.match_font(font_family)
@@ -54,16 +61,24 @@ class TextInput:
 		self.cursor_ms_counter = 0
 		self.clock = pygame.time.Clock()
 
-	
 	def update(self, events):
 		Type, word_height = False, 0
 		for event in events:
 				
 			# Click on text box to type
-			if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not self.active == "always":
-				self.active = self.rect.collidepoint(event.pos) 
+			if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not self.focus == "always":
+				self.focus = self.rect.collidepoint(event.pos)
 			
-			if event.type == pygame.TEXTINPUT and self.active:
+			if event.type == pl.KEYUP and event.key == pl.K_RIGHT:
+				self.cursor_toggle, self.cursor_visible = True, True
+			elif event.type == pl.KEYDOWN and event.key == pl.K_RIGHT:
+				self.cursor_toggle, self.cursor_visible = False, True
+			elif event.type == pl.KEYUP and event.key == pl.K_LEFT:
+				self.cursor_toggle, self.cursor_visible = True, True
+			elif event.type == pl.KEYDOWN and event.key == pl.K_LEFT:
+				self.cursor_toggle, self.cursor_visible = False, True
+
+			if event.type == pygame.TEXTINPUT and self.focus:
 				self.cursor_visible = True  # So the user sees where he writes
 
 				# If none exist, create counter for that key:
@@ -86,8 +101,8 @@ class TextInput:
 						)
 					self.cursor_position += len(event.text)  # Some are empty, e.g. K_UP
 			
-			elif event.type == pl.KEYDOWN and self.active:
-				
+			elif event.type == pl.KEYDOWN and self.focus:
+
 				if event.key == pl.K_BACKSPACE:
 					self.input_string = (
 						self.input_string[:max(self.cursor_position - 1, 0)]
@@ -125,7 +140,6 @@ class TextInput:
 					if len(self.input_string + pyperclip.paste()) <= self.limit or self.limit == 0:
 						self.input_string += pyperclip.paste()
 						self.cursor_position = len(self.input_string)
-					
 
 			elif event.type == pl.KEYUP:
 				# *** Because KEYUP doesn't include event.unicode, this dict is stored in such a weird way
@@ -149,9 +163,10 @@ class TextInput:
 		if self.rect is not None: self.surface = pygame.Surface((self.rect.w, self.rect.h), pygame.SRCALPHA, 32)
 		
 		# Re-render text surface
-		if not self.active and len(self.input_string) == 0:
+		if not self.focus and len(self.input_string) == 0:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
-			self.surface.blit(self.font_object.render(self.message, self.antialias, self.text_color), (0, 0))
+			self.surface.blit(self.font_object.render(self.prompt, self.antialias, self.text_color), (0, 0))
+
 		elif self.mult_line:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
 			x, y = 0, 0
@@ -166,48 +181,43 @@ class TextInput:
 						y += word_height
 					self.surface.blit(word_surface, (x, y))
 					x += word_width + space
-				x = 0
-				y += word_height
+				x = 0; y += word_height
+
 		else:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
-			if self.input_string == "": self.surface.blit(self.font_object.render(" ", self.antialias, self.text_color), (0, 0))  # Pygame Bug (| - vertical black line)
+			if self.input_string == "": self.surface.blit(self.font_object.render(" ", self.antialias, self.text_color), (0, 0))
 			else: self.surface.blit(self.font_object.render(self.input_string, self.antialias, self.text_color), (0, 0))
 			if self.rect is None: self.surface = self.font_object.render(self.input_string, self.antialias, self.text_color)
-		
-		# Update self.cursor_visible
-		self.cursor_ms_counter += self.clock.get_time()
-		if self.cursor_ms_counter >= self.cursor_switch_ms:
-			self.cursor_ms_counter %= self.cursor_switch_ms
-			self.cursor_visible = not self.cursor_visible
 
-		if self.cursor_visible and self.active:
+		# Update self.cursor_visible
+		if self.cursor_toggle:
+			self.cursor_ms_counter += self.clock.get_time()
+			if self.cursor_ms_counter >= self.cursor_switch_ms:
+				self.cursor_ms_counter %= self.cursor_switch_ms
+				self.cursor_visible = not self.cursor_visible
+
+		if self.cursor_visible and self.focus:
 			cursor_x_pos = self.font_object.size(self.input_string[:self.cursor_position])[0]
+
 			# Without this, the cursor is invisible when self.cursor_position > 0
 			if self.cursor_position > 0:
 				cursor_x_pos -= self.cursor_surface.get_width()
 			self.surface.blit(self.cursor_surface, (cursor_x_pos, 0))
 
-
 		self.clock.tick()
 		return False
-	
-			
-	def get_surface(self): return self.surface
 
+	def get_surface(self): return self.surface
 
 	def get_text(self): return self.input_string
 
-
 	def get_cursor_position(self): return self.cursor_position
-	
-	
-	def get_active(self): return self.active
-	
-	
+
+	def get_active(self): return self.focus
+
 	def clear_text(self):
 		self.input_string = ""
 		self.cursor_position = 0
-
 
 
 if __name__ == "__main__":
@@ -232,5 +242,4 @@ if __name__ == "__main__":
 		# Blit its surface onto the screen
 		screen.blit(TextInput.get_surface(), (10, 10))
 
-		pygame.display.update()
-		clock.tick(15)
+		pygame.display.update(); clock.tick(15)
