@@ -62,7 +62,7 @@ class TextInput:
 		self.clock = pygame.time.Clock()
 
 	def update(self, events):
-		Type, word_height = False, 0
+		Type, word_height, lines, offsetX = False, 0, 1, []
 		for event in events:
 				
 			# Click on text box to type
@@ -111,6 +111,7 @@ class TextInput:
 						
 					# Subtract one from cursor_pos, but do not go below zero:
 					self.cursor_position = max(self.cursor_position - 1, 0)
+					self.cursor_toggle, self.cursor_visible = True, True
 				
 				elif event.key == pl.K_DELETE:
 					self.input_string = (
@@ -163,13 +164,14 @@ class TextInput:
 		if self.rect is not None: self.surface = pygame.Surface((self.rect.w, self.rect.h), pygame.SRCALPHA, 32)
 		
 		# Re-render text surface
+		ch_list = []
 		if not self.focus and len(self.input_string) == 0:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
 			self.surface.blit(self.font_object.render(self.prompt, self.antialias, self.text_color), (0, 0))
 
 		elif self.mult_line:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
-			x, y = 0, 0
+			x, y, ch_start, ch_end = 0, 0, 0, 0
 			space = self.font_object.size(' ')[0]
 			words = [word.split() for word in self.input_string.splitlines()]
 			for line in words:
@@ -177,12 +179,16 @@ class TextInput:
 					word_surface = self.font_object.render(word, self.antialias, self.text_color)
 					word_width, word_height = word_surface.get_size()
 					if x + word_width >= self.rect.w:
-						x = 0
-						y += word_height
+						offsetX.append(self.rect.w - x)
+						ch_list.append([ch_start, ch_end])
+						ch_start = ch_end
+						lines += 1
+						x = 0; y += word_height
+					ch_end += len(word) + 1
 					self.surface.blit(word_surface, (x, y))
 					x += word_width + space
 				x = 0; y += word_height
-
+			ch_list.append([ch_start, ch_end])
 		else:
 			if self.surf_color is not None: self.surface.fill(self.surf_color)
 			if self.input_string == "": self.surface.blit(self.font_object.render(" ", self.antialias, self.text_color), (0, 0))
@@ -196,13 +202,20 @@ class TextInput:
 				self.cursor_ms_counter %= self.cursor_switch_ms
 				self.cursor_visible = not self.cursor_visible
 
+		currentLine = lines
+		for z in range(0, len(ch_list)):
+			if min(ch_list[z]) <= self.cursor_position < max(ch_list[z]):
+				currentLine = z + 1
+
 		if self.cursor_visible and self.focus:
-			cursor_x_pos = self.font_object.size(self.input_string[:self.cursor_position])[0]
+			cursor_x_pos = self.font_object.size(self.input_string[:self.cursor_position])[0] - (self.rect.w * (currentLine - 1)) + sum(offsetX[:currentLine - 1])
+			if currentLine == 1: cursor_x_pos = self.font_object.size(self.input_string[:self.cursor_position])[0]
+			cursor_y_pos = self.font_object.get_height() * (currentLine - 1)
 
 			# Without this, the cursor is invisible when self.cursor_position > 0
-			if self.cursor_position > 0:
+			if self.cursor_position > 0 and cursor_y_pos == 0:
 				cursor_x_pos -= self.cursor_surface.get_width()
-			self.surface.blit(self.cursor_surface, (cursor_x_pos, 0))
+			self.surface.blit(self.cursor_surface, (cursor_x_pos, cursor_y_pos))
 
 		self.clock.tick()
 		return False
